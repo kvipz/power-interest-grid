@@ -2,6 +2,8 @@
 
 Interactive stakeholder mapping tool. Add stakeholders and drag them into the quadrant (Manage Closely, Keep Satisfied, Keep Informed, Monitor) that fits their power and interest level. Changes are saved automatically in the browser via `localStorage`.
 
+Framework from ["Platform Engineering"](https://www.oreilly.com/library/view/platform-engineering/9781098153632/) by Camille Fournier & Ian Nowland.
+
 Live at: https://vip-in-the-cloud.dev/power-interest-grid/
 
 Static site served from `docs/` via GitHub Pages.
