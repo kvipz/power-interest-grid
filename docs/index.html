@@ -1,346 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Power-Interest Grid</title>
-<style>
-    * { box-sizing: border-box; }
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-        margin: 0;
-        padding: 24px 16px 48px;
-        background: #f8fafc;
-        color: #1e293b;
-    }
-    .wrap {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-    h1 {
-        text-align: center;
-        margin-bottom: 4px;
-        font-size: 28px;
-    }
-    .subtitle {
-        text-align: center;
-        color: #64748b;
-        margin-bottom: 24px;
-        font-size: 14px;
-    }
-    .reference {
-        text-align: center;
-        color: #94a3b8;
-        margin-top: 24px;
-        font-size: 12px;
-        font-style: italic;
-    }
-    .add-row {
-        display: flex;
-        gap: 8px;
-        max-width: 420px;
-        margin: 0 auto 32px;
-    }
-    .add-row input {
-        flex: 1;
-        padding: 8px 12px;
-        font-size: 14px;
-        border: 1px solid #d9d9d9;
-        border-radius: 6px;
-        outline: none;
-    }
-    .add-row input:focus {
-        border-color: #1677ff;
-    }
-    .add-row button {
-        padding: 8px 16px;
-        font-size: 14px;
-        background: #1677ff;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    .add-row button:hover {
-        background: #4096ff;
-    }
-    .grid-area {
-        display: flex;
-        justify-content: center;
-    }
-    .axis-vertical {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        height: min(80vw, 600px);
-        margin-right: 8px;
-        padding-block: 24px;
-    }
-    .axis-vertical span {
-        font-weight: 600;
-        font-size: 13px;
-        writing-mode: vertical-rl;
-        transform: rotate(180deg);
-    }
-    .grid-container {
-        position: relative;
-        width: min(80vw, 600px);
-        height: min(80vw, 600px);
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-        border: 2px solid #94a3b8;
-        border-radius: 8px;
-        overflow: hidden;
-        user-select: none;
-    }
-    .quadrant {
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-    }
-    .quadrant .label {
-        font-weight: 600;
-        font-size: 13px;
-        line-height: 1.3;
-    }
-    .quadrant .sub {
-        font-size: 11px;
-        color: #64748b;
-    }
-    #q-manage-closely { background: #dbeafe; align-items: flex-end; justify-content: flex-start; text-align: right; }
-    #q-keep-satisfied { background: #ede9fe; align-items: flex-start; justify-content: flex-start; text-align: left; }
-    #q-keep-informed { background: #dcfce7; align-items: flex-end; justify-content: flex-end; text-align: right; }
-    #q-monitor { background: #fef9c3; align-items: flex-start; justify-content: flex-end; text-align: left; }
-    /* Grid placement: top-left, top-right, bottom-left, bottom-right */
-    #q-keep-satisfied { grid-area: 1 / 1 / 2 / 2; }
-    #q-manage-closely { grid-area: 1 / 2 / 2 / 3; }
-    #q-monitor { grid-area: 2 / 1 / 3 / 2; }
-    #q-keep-informed { grid-area: 2 / 2 / 3 / 3; }
-    .divider-v {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        background: #94a3b8;
-    }
-    .divider-h {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #94a3b8;
-    }
-    .point {
-        position: absolute;
-        transform: translate(-50%, -50%);
-        cursor: grab;
-        background: #fff;
-        border: 1px solid #1677ff;
-        border-radius: 6px;
-        padding: 3px 6px;
-        width: 90px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        z-index: 2;
-    }
-    .point:active {
-        cursor: grabbing;
-    }
-    .point .name {
-        font-size: 10px;
-        line-height: 1.2;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        white-space: normal;
-        color: #1e293b;
-    }
-    .point .remove {
-        font-size: 10px;
-        color: #94a3b8;
-        cursor: pointer;
-        flex-shrink: 0;
-        line-height: 1;
-    }
-    .point .remove:hover {
-        color: #ef4444;
-    }
-    .axis-horizontal {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
-        font-weight: 600;
-        font-size: 13px;
-    }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power-Interest Grid</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body>
-<div class="wrap">
-    <h1>Power-Interest Grid</h1>
-    <div class="subtitle">Add stakeholders below, then drag them into the quadrant that fits best. Your changes are saved automatically.</div>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <div id="root"></div>
 
-    <div class="add-row">
-        <input type="text" id="nameInput" placeholder="Stakeholder name" maxlength="60">
-        <button id="addBtn">Add</button>
-    </div>
-
-    <div class="grid-area">
-        <div class="axis-vertical">
-            <span>High Power &#9650;</span>
-            <span>&#9660; Low Power</span>
-        </div>
-        <div>
-            <div class="grid-container" id="gridContainer">
-                <div class="quadrant" id="q-manage-closely">
-                    <span class="label">Manage Closely</span>
-                    <span class="sub">High Power &middot; High Interest</span>
-                </div>
-                <div class="quadrant" id="q-keep-satisfied">
-                    <span class="label">Keep Satisfied</span>
-                    <span class="sub">High Power &middot; Low Interest</span>
-                </div>
-                <div class="quadrant" id="q-keep-informed">
-                    <span class="label">Keep Informed</span>
-                    <span class="sub">Low Power &middot; High Interest</span>
-                </div>
-                <div class="quadrant" id="q-monitor">
-                    <span class="label">Monitor with Minimum Effort</span>
-                    <span class="sub">Low Power &middot; Low Interest</span>
-                </div>
-                <div class="divider-v"></div>
-                <div class="divider-h"></div>
-            </div>
-            <div class="axis-horizontal">
-                <span>&#9664; Low Interest</span>
-                <span>High Interest &#9654;</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="reference">Framework from "Platform Engineering" by Camille Fournier &amp; Ian Nowland</div>
-</div>
-
-<script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
     const STORAGE_KEY = 'powerInterestGridPoints';
-    const grid = document.getElementById('gridContainer');
-    const nameInput = document.getElementById('nameInput');
-    const addBtn = document.getElementById('addBtn');
 
-    let nextId = 1;
-    let points = [];
+    const QUADRANT_MAP = {
+      mc: { label: 'Manage Closely',  badge: 'bg-blue-100 text-blue-700',    border: 'border-blue-300'   },
+      ks: { label: 'Keep Satisfied',  badge: 'bg-violet-100 text-violet-700', border: 'border-violet-300' },
+      ki: { label: 'Keep Informed',   badge: 'bg-green-100 text-green-700',   border: 'border-green-300'  },
+      mo: { label: 'Monitor',         badge: 'bg-amber-50 text-amber-700',    border: 'border-amber-200'  },
+    };
+
+    function getQuadrant(x, y) {
+      // x: 0 = low interest, 100 = high interest
+      // y: 0 = top = high power, 100 = bottom = low power
+      if (y < 50 && x >= 50) return QUADRANT_MAP.mc;
+      if (y < 50 && x  < 50) return QUADRANT_MAP.ks;
+      if (y >= 50 && x >= 50) return QUADRANT_MAP.ki;
+      return QUADRANT_MAP.mo;
+    }
 
     function loadPoints() {
-        try {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-            return Array.isArray(saved) ? saved : [];
-        } catch {
-            return [];
-        }
+      try {
+        const d = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(d) ? d : [];
+      } catch { return []; }
     }
 
-    function savePoints() {
+    function App() {
+      const [points, setPoints] = useState(loadPoints);
+      const [nextId, setNextId] = useState(() =>
+        loadPoints().reduce((m, p) => Math.max(m, p.id), 0) + 1
+      );
+      const [input, setInput] = useState('');
+      const gridRef = useRef(null);
+      const dragId = useRef(null);
+
+      useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(points));
-    }
+      }, [points]);
 
-    function renderPoint(point) {
-        const el = document.createElement('div');
-        el.className = 'point';
-        el.dataset.id = point.id;
-        el.style.left = point.x + '%';
-        el.style.top = point.y + '%';
-
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'name';
-        nameSpan.textContent = point.name;
-
-        const removeSpan = document.createElement('span');
-        removeSpan.className = 'remove';
-        removeSpan.textContent = '✕';
-        removeSpan.addEventListener('click', () => removePoint(point.id));
-
-        el.appendChild(nameSpan);
-        el.appendChild(removeSpan);
-
-        el.addEventListener('mousedown', (e) => startDrag(e, point.id));
-        el.addEventListener('touchstart', (e) => startDrag(e, point.id), { passive: false });
-
-        grid.appendChild(el);
-    }
-
-    function removePoint(id) {
-        points = points.filter(p => p.id !== id);
-        savePoints();
-        const el = grid.querySelector('.point[data-id="' + id + '"]');
-        if (el) el.remove();
-    }
-
-    function addPoint() {
-        const name = nameInput.value.trim();
+      const add = () => {
+        const name = input.trim();
         if (!name) return;
-        const point = { id: nextId++, name, x: 50, y: 50 };
-        points.push(point);
-        savePoints();
-        renderPoint(point);
-        nameInput.value = '';
-        nameInput.focus();
-    }
+        setPoints(prev => [...prev, { id: nextId, name, x: 50, y: 50 }]);
+        setNextId(n => n + 1);
+        setInput('');
+      };
 
-    let draggingId = null;
+      const remove = (id) => setPoints(prev => prev.filter(p => p.id !== id));
 
-    function startDrag(e, id) {
+      const startDrag = useCallback((e, id) => {
         e.preventDefault();
-        draggingId = id;
-        window.addEventListener('mousemove', onDragMove);
-        window.addEventListener('mouseup', stopDrag);
-        window.addEventListener('touchmove', onDragMove, { passive: false });
-        window.addEventListener('touchend', stopDrag);
+        dragId.current = id;
+
+        const onMove = (ev) => {
+          if (dragId.current == null || !gridRef.current) return;
+          ev.preventDefault();
+          const c = ev.touches ? ev.touches[0] : ev;
+          const r = gridRef.current.getBoundingClientRect();
+          const x = Math.min(100, Math.max(0, ((c.clientX - r.left) / r.width) * 100));
+          const y = Math.min(100, Math.max(0, ((c.clientY - r.top) / r.height) * 100));
+          setPoints(prev => prev.map(p =>
+            p.id === dragId.current ? { ...p, x, y } : p
+          ));
+        };
+
+        const onStop = () => {
+          dragId.current = null;
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onStop);
+          window.removeEventListener('touchmove', onMove);
+          window.removeEventListener('touchend', onStop);
+        };
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onStop);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onStop);
+      }, []);
+
+      return (
+        <div className="max-w-xl mx-auto px-3 py-8 sm:px-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-1">Power-Interest Grid</h1>
+          <p className="text-center text-slate-500 text-sm mb-6">
+            Add stakeholders, then drag them into the right quadrant.
+          </p>
+
+          {/* Add form */}
+          <div className="flex gap-2 mb-8">
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && add()}
+              placeholder="Stakeholder name"
+              maxLength={60}
+              className="flex-1 px-3 py-2.5 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+            <button
+              onClick={add}
+              className="px-5 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-500 active:bg-blue-700 transition-colors"
+            >
+              Add
+            </button>
+          </div>
+
+          {/*
+            CSS Grid layout: [y-axis 20px] [grid 1fr]
+                             [empty]       [x-axis]
+            This constrains the grid to available width so nothing overflows on mobile.
+          */}
+          <div style={{ display: 'grid', gridTemplateColumns: '20px 1fr', gridTemplateRows: '1fr auto', gap: '0 8px' }}>
+
+            {/* Y-axis label */}
+            <div className="flex flex-col justify-between items-center py-5 text-slate-500">
+              <span
+                className="text-xs font-semibold"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                High Power ▲
+              </span>
+              <span
+                className="text-xs font-semibold"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                ▼ Low Power
+              </span>
+            </div>
+
+            {/* 2D drag-and-drop grid */}
+            <div
+              ref={gridRef}
+              className="relative border-2 border-slate-400 rounded-xl overflow-hidden"
+              style={{ aspectRatio: '1 / 1', touchAction: 'none' }}
+            >
+              {/* Quadrant colour blocks */}
+              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
+                <div className="bg-violet-100 p-2 sm:p-3 flex flex-col">
+                  <span className="font-semibold text-xs sm:text-sm text-violet-900 leading-tight">Keep Satisfied</span>
+                  <span className="text-xs text-slate-500 hidden sm:block mt-0.5">High Power · Low Interest</span>
+                </div>
+                <div className="bg-blue-100 p-2 sm:p-3 flex flex-col items-end text-right">
+                  <span className="font-semibold text-xs sm:text-sm text-blue-900 leading-tight">Manage Closely</span>
+                  <span className="text-xs text-slate-500 hidden sm:block mt-0.5">High Power · High Interest</span>
+                </div>
+                <div className="bg-amber-50 p-2 sm:p-3 flex flex-col justify-end">
+                  <span className="font-semibold text-xs sm:text-sm text-amber-900 leading-tight">Monitor</span>
+                  <span className="text-xs text-slate-500 hidden sm:block mt-0.5">Low Power · Low Interest</span>
+                </div>
+                <div className="bg-green-100 p-2 sm:p-3 flex flex-col items-end justify-end text-right">
+                  <span className="font-semibold text-xs sm:text-sm text-green-900 leading-tight">Keep Informed</span>
+                  <span className="text-xs text-slate-500 hidden sm:block mt-0.5">Low Power · High Interest</span>
+                </div>
+              </div>
+
+              {/* Divider lines */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-400 pointer-events-none" />
+              <div className="absolute top-1/2 left-0 right-0 h-px bg-slate-400 pointer-events-none" />
+
+              {/* Draggable stakeholder chips */}
+              {points.map(pt => (
+                <div
+                  key={pt.id}
+                  className="absolute flex items-center gap-1 bg-white border border-blue-500 rounded-md shadow cursor-grab active:cursor-grabbing z-10"
+                  style={{
+                    left: `${pt.x}%`,
+                    top: `${pt.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                    padding: '3px 7px',
+                    maxWidth: '90px',
+                    minWidth: '48px',
+                  }}
+                  onMouseDown={e => startDrag(e, pt.id)}
+                  onTouchStart={e => startDrag(e, pt.id)}
+                >
+                  <span
+                    className="text-slate-800 leading-snug flex-1 min-w-0"
+                    style={{ fontSize: '10px', wordBreak: 'break-word' }}
+                  >
+                    {pt.name}
+                  </span>
+                  <span
+                    className="text-slate-300 hover:text-red-400 cursor-pointer shrink-0"
+                    style={{ fontSize: '10px', lineHeight: 1 }}
+                    onMouseDown={e => e.stopPropagation()}
+                    onTouchStart={e => e.stopPropagation()}
+                    onClick={() => remove(pt.id)}
+                  >
+                    ✕
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Empty spacer below y-axis */}
+            <div />
+
+            {/* X-axis labels — constrained to grid column, no overflow */}
+            <div className="mt-2 flex justify-between text-xs font-semibold text-slate-500">
+              <span>◄ Low Interest</span>
+              <span>High Interest ►</span>
+            </div>
+          </div>
+
+          {/* Stakeholder list — readable summary on mobile */}
+          {points.length > 0 && (
+            <div className="mt-8">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+                Stakeholders
+              </p>
+              <div className="space-y-2">
+                {points.map(pt => {
+                  const q = getQuadrant(pt.x, pt.y);
+                  return (
+                    <div
+                      key={pt.id}
+                      className={`flex items-center justify-between bg-white rounded-xl px-3 py-2.5 border ${q.border} shadow-sm`}
+                    >
+                      <span className="text-sm font-medium text-slate-700 truncate mr-3 flex-1 min-w-0">
+                        {pt.name}
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap ${q.badge}`}>
+                          {q.label}
+                        </span>
+                        <button
+                          onClick={() => remove(pt.id)}
+                          className="text-slate-300 hover:text-red-400 transition-colors text-base leading-none p-1"
+                          aria-label={`Remove ${pt.name}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <p className="text-center text-slate-400 text-xs italic mt-10 mb-2">
+            Framework from "Platform Engineering" by Camille Fournier &amp; Ian Nowland
+          </p>
+        </div>
+      );
     }
 
-    function onDragMove(e) {
-        if (draggingId == null) return;
-        e.preventDefault();
-        const point = e.touches ? e.touches[0] : e;
-        const rect = grid.getBoundingClientRect();
-        let x = ((point.clientX - rect.left) / rect.width) * 100;
-        let y = ((point.clientY - rect.top) / rect.height) * 100;
-        x = Math.min(100, Math.max(0, x));
-        y = Math.min(100, Math.max(0, y));
-
-        const data = points.find(p => p.id === draggingId);
-        if (data) {
-            data.x = x;
-            data.y = y;
-        }
-        const el = grid.querySelector('.point[data-id="' + draggingId + '"]');
-        if (el) {
-            el.style.left = x + '%';
-            el.style.top = y + '%';
-        }
-    }
-
-    function stopDrag() {
-        if (draggingId != null) savePoints();
-        draggingId = null;
-        window.removeEventListener('mousemove', onDragMove);
-        window.removeEventListener('mouseup', stopDrag);
-        window.removeEventListener('touchmove', onDragMove);
-        window.removeEventListener('touchend', stopDrag);
-    }
-
-    addBtn.addEventListener('click', addPoint);
-    nameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') addPoint();
-    });
-
-    // Init
-    points = loadPoints();
-    nextId = points.reduce((max, p) => Math.max(max, p.id), 0) + 1;
-    points.forEach(renderPoint);
-</script>
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
 </body>
 </html>
