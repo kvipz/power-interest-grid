@@ -21,22 +21,6 @@
     const { useState, useEffect, useRef, useCallback } = React;
     const STORAGE_KEY = 'powerInterestGridPoints';
 
-    const QUADRANT_MAP = {
-      mc: { label: 'Manage Closely',  badge: 'bg-blue-100 text-blue-700',    border: 'border-blue-300'   },
-      ks: { label: 'Keep Satisfied',  badge: 'bg-violet-100 text-violet-700', border: 'border-violet-300' },
-      ki: { label: 'Keep Informed',   badge: 'bg-green-100 text-green-700',   border: 'border-green-300'  },
-      mo: { label: 'Monitor',         badge: 'bg-amber-50 text-amber-700',    border: 'border-amber-200'  },
-    };
-
-    function getQuadrant(x, y) {
-      // x: 0 = low interest, 100 = high interest
-      // y: 0 = top = high power, 100 = bottom = low power
-      if (y < 50 && x >= 50) return QUADRANT_MAP.mc;
-      if (y < 50 && x  < 50) return QUADRANT_MAP.ks;
-      if (y >= 50 && x >= 50) return QUADRANT_MAP.ki;
-      return QUADRANT_MAP.mo;
-    }
-
     function loadPoints() {
       try {
         const d = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -122,9 +106,6 @@
             </button>
           </div>
 
-          {/* On desktop: grid and stakeholder list sit side by side */}
-          <div className="lg:flex lg:gap-8 lg:items-start">
-          <div className="lg:flex-1 lg:min-w-0">
           {/*
             CSS Grid layout: [y-axis 20px] [grid 1fr]
                              [empty]       [x-axis]
@@ -222,44 +203,6 @@
               <span>High Interest ►</span>
             </div>
           </div>
-
-          </div>{/* /grid-section */}
-          {/* Stakeholder list — readable summary on mobile */}
-          {points.length > 0 && (
-            <div className="mt-8 lg:mt-0 lg:w-64 lg:flex-shrink-0">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
-                Stakeholders
-              </p>
-              <div className="space-y-2">
-                {points.map(pt => {
-                  const q = getQuadrant(pt.x, pt.y);
-                  return (
-                    <div
-                      key={pt.id}
-                      className={`flex items-center justify-between bg-white rounded-xl px-3 py-2.5 border ${q.border} shadow-sm`}
-                    >
-                      <span className="text-sm font-medium text-slate-700 truncate mr-3 flex-1 min-w-0">
-                        {pt.name}
-                      </span>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap ${q.badge}`}>
-                          {q.label}
-                        </span>
-                        <button
-                          onClick={() => remove(pt.id)}
-                          className="text-slate-300 hover:text-red-400 transition-colors text-base leading-none p-1"
-                          aria-label={`Remove ${pt.name}`}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          </div>{/* /lg:flex */}
 
           <p className="text-center text-slate-400 text-xs italic mt-10 mb-2">
             Framework from "Platform Engineering" by Camille Fournier &amp; Ian Nowland
